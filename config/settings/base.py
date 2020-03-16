@@ -62,6 +62,8 @@ THIRD_APPS = [
 ]
 
 LOCAL_APPS = [
+    'core.vendors',
+    'core.members'
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_APPS + LOCAL_APPS
@@ -221,7 +223,3 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
     }
 }
-
-CHECK_GOOGLE_RECAPTCHA = True
-BYPASS_RECAPTCHA = env.str('BYPASS_RECAPTCHA',
-                           default="!!!NOT ALLOWED!!!")
