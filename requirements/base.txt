@@ -1,0 +1,12 @@
+asgiref
+Django
+pytz
+sqlparse
+python-dateutil
+django-cors-headers
+django-environ
+django-hosts
+django-nested-admin
+django-rest-swagger
+djangorestframework
+django-tinymce
