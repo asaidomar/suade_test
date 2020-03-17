@@ -7,13 +7,15 @@
 # author : alisaidomar
 
 from rest_framework import serializers
-from core.members import models as member_models
+from core.promotions import models as promotion_models
 
 
-class MemberSerializer(serializers.ModelSerializer):
-    """ core.members.models.Member serializer """
+class DiscountSerializer(serializers.ModelSerializer):
+    """ core.promotions.models.Promotion serializer """
+    end_date = serializers.ReadOnlyField()
+
     class Meta:
         """Meta class information """
-        model = member_models.Member
+        model = promotion_models.Discount
         fields = '__all__'
-        read_only_fields = ("pk", )
+        read_only_fields = ("pk", 'end_date')

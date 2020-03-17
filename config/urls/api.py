@@ -46,6 +46,7 @@ urlpatterns = [
     url(r'^rest/', include('core.members.urls')),
     url(r'^rest/', include('core.products.urls')),
     url(r'^rest/', include('core.orders.urls')),
+    url(r'^rest/', include('core.promotions.urls')),
 ]
 
 if settings.DEBUG:

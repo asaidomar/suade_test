@@ -1,66 +1,63 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# filename : test_products
+# filename : test_promotions
 # date : 2020-03-17
 # project: suade_test
 # author : alisaidomar
+from datetime import datetime
 
 import pytest
 from django.urls import reverse
-from mixer.backend.django import mixer
 
-from core.products import models as product_models
+from core.promotions import models as promotion_models
 from ..base import TestBase
 
 
 @pytest.mark.urls('config.urls')
 @pytest.mark.django_db
-class TestProductAPI(TestBase):
-    """ core.products.models.VendorProduct API tests """
+class TestDiscountAPI(TestBase):
+    """ core.promotions.models.Discount API tests """
 
-    def test_create_product(self, create_vendor):
-        def product_factory(**kwargs):  # noqa
+    def test_create_discount(self):
+        def discount_factory(**kwargs):  # noqa
             return {
-                "code": str(id(mixer.FAKE)),
-                "brand": "string",
-                "description": "string",
-                "price": 10,
-                "currency": "Euros",
-                "vendor": create_vendor.pk
+                "start_at": datetime.now().strftime("%Y-%m-%d"),
+                "n_days": 0,
+                "amount": 0
             }
 
         self._test_create_resource(
-            reverse("product-list"),
-            product_models.Product,
-            product_factory
+            reverse("discount-list"),
+            promotion_models.Discount,
+            discount_factory
         )
 
-    def test_get_products(self, create_product):
-        ret = self._test_get_resource(reverse("product-list"))
-        assert create_product.pk in [m['id'] for m in ret.json()]
+    def test_get_promotions(self, create_discount):
+        ret = self._test_get_resource(reverse("discount-list"))
+        assert create_discount.pk in [m['id'] for m in ret.json()]
 
-    def test_get_product(self, create_product):
-        path = reverse("product-detail",
-                       kwargs={"pk": create_product.pk})
+    def test_get_discount(self, create_discount):
+        path = reverse("discount-detail",
+                       kwargs={"pk": create_discount.pk})
         ret = self._test_get_resource(path)
-        assert ret.json()['id'] == create_product.pk
+        assert ret.json()['id'] == create_discount.pk
 
-    def test_patch_product(self, create_product):
-        def product_factory(**kwargs):  # noqa
+    def test_patch_discount(self, create_discount):
+        def discount_factory(**kwargs):  # noqa
             return {
-                "description": create_product.description + " Update"
+                "amout": create_discount.amount + 10
             }
 
-        path = reverse("product-detail",
-                       kwargs={"pk": create_product.pk})
+        path = reverse("discount-detail",
+                       kwargs={"pk": create_discount.pk})
         self._test_patch_resource(
             path,
-            product_models.Product,
-            product_factory
+            promotion_models.Discount,
+            discount_factory
         )
 
-    def test_delete_product(self, create_product):
-        path = reverse("product-detail",
-                       kwargs={"pk": create_product.pk})
+    def test_delete_discount(self, create_discount):
+        path = reverse("discount-detail",
+                       kwargs={"pk": create_discount.pk})
         self._test_delete_resource(path)

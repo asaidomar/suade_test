@@ -2,18 +2,18 @@
 # -*- coding: utf-8 -*-
 
 # filename : urls
-# date : 2020-03-16
+# date : 2020-03-17
 # project: suade_test
 # author : alisaidomar
 from django.conf.urls import url
 from django.urls import include
 from rest_framework.routers import DefaultRouter
 
-from core.members import views
+from core.promotions import views
 
 router = DefaultRouter()
 
-router.register(r'members', views.MemberViewSet)
+router.register(r'discounts', views.DiscountViewSet)
 
 urlpatterns = [
     url(r'^', include(router.urls)),

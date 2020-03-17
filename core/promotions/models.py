@@ -20,3 +20,6 @@ class Discount(models.Model):
     def end_date(self) -> datetime.date:
         """ End date """
         return self.start_at + datetime.timedelta(days=self.n_days)
+
+    def __str__(self):
+        return str(self.amount)
