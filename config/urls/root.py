@@ -13,8 +13,8 @@ def home(request):
 
 _urlpatterns = [
     path('admin/', admin.site.urls, name="admin"),
-    path('pages/', include('django.contrib.flatpages.urls')),
     url(r'^_nested_admin/', include('nested_admin.urls')),
+    url(r"^accounts/", include('django.contrib.auth.urls')),
 ]
 
 _urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -15,9 +15,11 @@ import environ
 from django.utils.translation import ugettext_lazy as _
 import pathlib
 
+from django_hosts import reverse_lazy
+
 parent = pathlib.Path(__file__).parents[2]
 
-ALLOWED_HOSTS = ["api.localhost", "localhost"]
+ALLOWED_HOSTS = ["api.localhost", "localhost", "127.0.0.1"]
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = environ.Path(__file__) - 3
@@ -54,11 +56,12 @@ DJANGO_APPS = [
 ]
 
 THIRD_APPS = [
+    'drf_yasg',
+    'tinymce',
     'corsheaders',
     'rest_framework',
-    'tinymce',
     'nested_admin',
-    'rest_framework_swagger',
+
 ]
 
 LOCAL_APPS = [
@@ -74,7 +77,6 @@ MIDDLEWARE = [
     'django.middleware.common.BrokenLinkEmailsMiddleware',
     'django.middleware.common.CommonMiddleware',
 
-    'django_hosts.middleware.HostsRequestMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -82,10 +84,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django_hosts.middleware.HostsResponseMiddleware',
 ]
 
-ROOT_URLCONF = 'config.urls.root'
+ROOT_URLCONF = 'config.urls'
 
 # django-hosts
 ROOT_HOSTCONF = 'config.hosts'
@@ -119,8 +120,9 @@ DATABASES = {
         'NAME': parent.joinpath('db', "db.sqlite3").as_posix(),
     }
 }
-
 DATABASES['default']['ATOMIC_REQUESTS'] = True
+
+
 
 AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
@@ -169,30 +171,6 @@ MEDIA_ROOT = str(APPS_DIR('media'))
 # https://docs.djangoproject.com/en/dev/ref/settings/#media-url
 MEDIA_URL = '/media/'
 
-CIVILITY_PARAMS = [
-    ('Mrs', _('Madame')),
-    ('Ms', _('Miss')),
-    ('Mr', _('Mister')),
-]
-
-MANAGER_GROUP = 'manager'
-
-SWAGGER_SETTINGS_IS_AUTHENTICATED = False
-SWAGGER_SETTINGS_LOGIN_URL = "/rest/auth/login"
-
-SWAGGER_SETTINGS = {
-    'exclude_url_names': [],
-    'exclude_namespaces': [],
-    'api_version': '0.1',
-    'relative_paths': False,
-    'is_authenticated': False,
-    'is_superuser': False,
-    'info': {
-        'contact': 'contact@wordnik.com',
-        'description': '',
-        'title': "API",
-    },
-}
 
 DJANGO_WYSIWYG_FLAVOR = "ckeditor"
 
@@ -222,4 +200,31 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
     }
+}
+
+
+# drf-yasg
+SWAGGER_SETTINGS = {
+    'LOGIN_URL': "/accounts/login/",
+    'LOGOUT_URL': '/accounts/login/',
+    'PERSIST_AUTH': True,
+    'REFETCH_SCHEMA_WITH_AUTH': True,
+    'REFETCH_SCHEMA_ON_LOGOUT': True,
+
+    'DEFAULT_INFO': 'config.urls.api.swagger_info',
+
+    'SECURITY_DEFINITIONS': {
+        'Basic': {
+            'type': 'basic'
+        }
+
+    },
+    "DEFAULT_PAGINATOR_INSPECTORS": [
+        'drf_yasg.inspectors.DjangoRestResponsePagination',
+        'drf_yasg.inspectors.CoreAPICompatInspector',
+    ]
+}
+
+REDOC_SETTINGS = {
+    'SPEC_URL': ('schema-json', {'format': '.json'}),
 }

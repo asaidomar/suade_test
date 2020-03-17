@@ -3,21 +3,40 @@ from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.shortcuts import redirect
 
-from rest_framework_swagger.views import get_swagger_view
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from rest_framework.decorators import api_view
 
-schema_view = get_swagger_view(title="API")
+swagger_info = openapi.Info(
+    title="API DOCUMENTATION",
+    default_version='v1',
+    description="API DOCUMENTATION",
+    terms_of_service="https://www.google.com/policies/terms/",
+    contact=openapi.Contact(email="contact@snippets.local"),
+    license=openapi.License(name="BSD License"),
+)
 
-
-def home(request):
-    return redirect(request._current_scheme_host.replace("api.", ""))
+schema_view = get_schema_view(
+    swagger_info,
+    validators=['ssv', 'flex'],
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
 
 
 urlpatterns = [
-    url(r'^ui/$', schema_view),
-    url(r'^front/index.html', home),
-]
+    url(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    url(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    url(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    url(r'^cached/swagger(?P<format>.json|.yaml)$', schema_view.without_ui(cache_timeout=None), name='cschema-json'),
+    url(r'^cached/swagger/$', schema_view.with_ui('swagger', cache_timeout=None), name='cschema-swagger-ui'),
+    url(r'^cached/redoc/$', schema_view.with_ui('redoc', cache_timeout=None), name='cschema-redoc'),
+
+    url(r'^rest/', include('core.vendors.urls')),
+    url(r'^rest/', include('core.members.urls')),
+]
 
 if settings.DEBUG:
     if "debug_toolbar" in settings.INSTALLED_APPS:

@@ -10,3 +10,8 @@ django-nested-admin
 django-rest-swagger
 djangorestframework
 django-tinymce
+drf-yasg
+djangorestframework-recursive
+pyyaml
+djangorestframework-camel-case
+swagger_spec_validator

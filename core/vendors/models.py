@@ -16,9 +16,9 @@ class VendorReview(models.Model):
     """ Vendor review model """
     MAX_STARS = 5
 
-    VENDOR_REVIEW_STARS = [ (i, i) for i in range(1, MAX_STARS + 1)]
+    VENDOR_REVIEW_STARS = [(i, i) for i in range(1, MAX_STARS + 1)]
 
-    creation_date = models.DateField(auto_created=True)
+    creation_date = models.DateField(auto_now_add=True)
     update_date = models.DateField(auto_now=True)
     content = models.TextField()
 
@@ -32,18 +32,30 @@ class Vendor(models.Model):
     """ Vendor model """
 
     ACTIVE = 'active'
-    NOACTIVE = 'active'
+    INACTIVE = 'inactive'
 
-    VENDOR_STATUS = [(ACTIVE, ACTIVE), (NOACTIVE, NOACTIVE)]
+    VENDOR_STATUS = [(ACTIVE, ACTIVE), (INACTIVE, INACTIVE)]
 
-    creation_date = models.DateField(auto_created=True)
+    creation_date = models.DateField(auto_now_add=True)
     update_date = models.DateField(auto_now=True)
     name = models.CharField(_('Vendor Name'), max_length=255)
     code = models.CharField(_('Vendor Code'), max_length=255, unique=True)
     country = models.CharField(_('Vendor Country'), max_length=255)
-    status = models.CharField(_('Vendor Status'), choices=VENDOR_STATUS)
+    status = models.CharField(
+        _('Vendor Status'), choices=VENDOR_STATUS, max_length=10)
     categories = models.ManyToManyField(
-        'VendorCategory', related_name="vendors")
+        'VendorCategory', related_name="vendors", blank=True)
+    tags = models.ManyToManyField(
+        'VendorTag', related_name="vendors", blank=True)
+
+    address = models.CharField(_('Vendor Street Address'), max_length=255)
+    city = models.CharField(_('Vendor City Address'), max_length=255)
+    zip = models.CharField(_('Vendor Zip Code Address'), max_length=255)
+    phone = models.CharField(_('Vendor Phone number'), max_length=255)
+    vat_number = models.CharField(
+        _('Vendor VAT Number'), max_length=30, blank=True, null=True)
+    iban = models.CharField(
+        _('Vendor IBAN number'), max_length=30, blank=True, null=True)
 
     @property
     def avg_stars(self):

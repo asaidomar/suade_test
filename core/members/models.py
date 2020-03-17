@@ -12,8 +12,8 @@ class Member(models.Model):
         ('Ms', _('Miss')),
         ('Mr', _('Mister')),
     ]
-    tel = models.CharField(_('Phone number'), blank=True)
-    civility = models.CharField(max_length=3,
+    tel = models.CharField(_('Phone number'), blank=True, max_length=20)
+    civility = models.CharField(max_length=10,
                                 choices=CIVILITY_PARAMS,
                                 blank=True)
     birthday = models.DateField(blank=True, null=True)
