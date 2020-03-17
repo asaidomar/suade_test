@@ -1,5 +1,4 @@
-import pathlib
-
+# noqa
 from .base import *
 
 DEBUG = False

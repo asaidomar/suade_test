@@ -5,8 +5,6 @@
 # date : 2020-03-17
 # project: suade_test
 # author : alisaidomar
-
-from rest_framework import viewsets
 from rest_framework import permissions
 
 from rest_framework import generics

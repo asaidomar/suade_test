@@ -27,9 +27,9 @@ class OrderItem(models.Model):
     product = models.ForeignKey(
         'products.Product', on_delete=models.DO_NOTHING)
     discount = models.ForeignKey(
-        'promotions.Discount', on_delete=models.DO_NOTHING, blank=True, null=True)
+        'promotions.Discount', on_delete=models.DO_NOTHING,
+        blank=True, null=True)
     quantity = models.PositiveIntegerField()
 
     def __str__(self):
         return f"{self.product}/{self.order}"
-

@@ -61,6 +61,7 @@ THIRD_APPS = [
     'corsheaders',
     'rest_framework',
     'nested_admin',
+    'debug_toolbar'
 
 ]
 

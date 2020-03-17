@@ -45,8 +45,10 @@ if settings.DEBUG:
     if "debug_toolbar" in settings.INSTALLED_APPS:
         import debug_toolbar
 
-        _urlpatterns = [url(r"^__debug__/", include(debug_toolbar.urls))] \
-                       + _urlpatterns
+        _urlpatterns += [
+                           url(r"^__debug__/", include(debug_toolbar.urls))
+        ]
+
 
 urlpatterns = [
     url(r'^backend/', include(_urlpatterns))

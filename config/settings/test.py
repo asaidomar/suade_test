@@ -1,3 +1,4 @@
+# noqa
 from .base import *
 
 DATABASES = {
