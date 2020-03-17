@@ -43,7 +43,7 @@ DEBUG = env.bool('DEBUG', default=True)
 
 SITE_ID = 1
 
-# Application definition
+# Applications definition
 DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -66,7 +66,10 @@ THIRD_APPS = [
 
 LOCAL_APPS = [
     'core.vendors',
-    'core.members'
+    'core.members',
+    'core.products',
+    'core.promotions',
+    'core.orders'
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_APPS + LOCAL_APPS
@@ -76,7 +79,6 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.BrokenLinkEmailsMiddleware',
     'django.middleware.common.CommonMiddleware',
-
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

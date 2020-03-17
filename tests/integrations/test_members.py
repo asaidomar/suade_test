@@ -5,7 +5,6 @@
 # date : 2020-03-17
 # project: suade_test
 # author : alisaidomar
-from random import randint
 
 import pytest
 from django.urls import reverse

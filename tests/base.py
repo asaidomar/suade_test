@@ -11,7 +11,6 @@ from django.contrib.auth.models import User
 from mixer.backend.django import mixer
 
 from rest_framework.test import APIClient
-from core.members import models as member_models
 
 
 @pytest.mark.urls('config.urls')

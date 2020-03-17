@@ -15,6 +15,9 @@ from mixer.backend.django import mixer
 
 from core.members import models as member_models
 from core.vendors import models as vendor_models
+from core.products import models as product_models
+from core.orders import models as order_models
+from core.promotions import models as promotion_models
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -24,21 +27,21 @@ def setup_env():
 
 
 @pytest.fixture
-def create_member():
+def create_member() -> member_models.Member:
     """ core.vendors.models.VendorTag fixture  """
     member_obj = mixer.blend(member_models.Member)
     return member_obj
 
 
 @pytest.fixture
-def create_user():
+def create_user() -> member_models.User:
     """ django.contrib.auth.models.User fixture  """
     member_obj = mixer.blend(member_models.User)
     return member_obj
 
 
 @pytest.fixture
-def api_client(create_member):
+def api_client(create_member) -> APIClient:
     """ Return an authenticated api client """
     api_client = APIClient()
     api_client.force_authenticate(create_member)
@@ -46,28 +49,56 @@ def api_client(create_member):
 
 
 @pytest.fixture
-def create_tag():
+def create_tag() -> vendor_models.VendorTag:
     """ core.vendors.models.VendorTag fixture  """
     tag_obj = mixer.blend(vendor_models.VendorTag)
     return tag_obj
 
 
 @pytest.fixture
-def create_category():
+def create_category() -> vendor_models.VendorCategory:
     """ core.vendors.models.VendorCategory fixture  """
     category_obj = mixer.blend(vendor_models.VendorCategory)
     return category_obj
 
 
 @pytest.fixture
-def create_review():
+def create_review() -> vendor_models.VendorReview:
     """ core.vendors.models.VendorReview fixture  """
-    category_obj = mixer.blend(vendor_models.VendorReview)
-    return category_obj
+    review_obj = mixer.blend(vendor_models.VendorReview)
+    return review_obj
 
 
 @pytest.fixture
-def create_vendor():
+def create_vendor() -> vendor_models.Vendor:
     """ core.vendors.models.Vendor fixture  """
-    category_obj = mixer.blend(vendor_models.Vendor)
-    return category_obj
+    vender_obj = mixer.blend(vendor_models.Vendor)
+    return vender_obj
+
+
+@pytest.fixture
+def create_product() -> product_models.Product:
+    """ core.products.models.Product fixture  """
+    product_obj = mixer.blend(product_models.Product)
+    return product_obj
+
+
+@pytest.fixture
+def create_order() -> order_models.Order:
+    """ core.orders.models.Order fixture  """
+    order_obj = mixer.blend(order_models.Order)
+    return order_obj
+
+
+@pytest.fixture
+def create_item() -> order_models.OrderItem:
+    """ core.orders.models.OrderItem fixture  """
+    item_obj = mixer.blend(order_models.OrderItem)
+    return item_obj
+
+
+@pytest.fixture
+def create_discount() -> promotion_models.Discount:
+    """ core.promotions.models.Discount fixture  """
+    discount_obj = mixer.blend(promotion_models.Discount)
+    return discount_obj

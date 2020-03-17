@@ -6,10 +6,16 @@ class VendorCategory(models.Model):
     """ Vendor category model """
     name = models.CharField(_('Vendor Category Name'), max_length=255)
 
+    def __str__(self):
+        return self.name
+
 
 class VendorTag(models.Model):
     """ Vendor tag model  """
     name = models.CharField(_('Vendor Category tag'), max_length=255)
+
+    def __str__(self):
+        return self.name
 
 
 class VendorReview(models.Model):
@@ -27,6 +33,9 @@ class VendorReview(models.Model):
     vendor = models.ForeignKey(
         'Vendor', on_delete=models.CASCADE, related_name="reviews")
 
+    def __str__(self):
+        return f"{self.author}"
+
 
 class Vendor(models.Model):
     """ Vendor model """
@@ -36,8 +45,9 @@ class Vendor(models.Model):
 
     VENDOR_STATUS = [(ACTIVE, ACTIVE), (INACTIVE, INACTIVE)]
 
-    creation_date = models.DateField(auto_now_add=True)
-    update_date = models.DateField(auto_now=True)
+    creation_date = models.DateField(
+        _('Vendor System Creation date'), auto_now_add=True)
+    update_date = models.DateField(_('Vendor update date'), auto_now=True)
     name = models.CharField(_('Vendor Name'), max_length=255)
     code = models.CharField(_('Vendor Code'), max_length=255, unique=True)
     country = models.CharField(_('Vendor Country'), max_length=255)
@@ -59,5 +69,9 @@ class Vendor(models.Model):
 
     @property
     def avg_stars(self):
+        """ Average reviews stars """
         reviews = list(self.reviews)
         return sum([review.star for review in reviews]) / len(reviews)
+
+    def __str__(self):
+        return self.name

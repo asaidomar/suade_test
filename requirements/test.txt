@@ -6,4 +6,6 @@ pycodestyle
 pyflakes
 pytest-flake8
 django-debug-toolbar
+pytest-coverage
+
 

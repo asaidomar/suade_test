@@ -19,7 +19,7 @@ class VendorSerializer(serializers.ModelSerializer):
         """Meta class information """
         model = Vendor
         fields = '__all__'
-        read_only_fields = ("pk", )
+        read_only_fields = ("pk", "creation_date", "update_date")
 
 
 class VendorCategorySerializer(serializers.ModelSerializer):
@@ -41,7 +41,7 @@ class VendorReviewSerializer(serializers.ModelSerializer):
         """Meta class information """
         model = VendorReview
         fields = '__all__'
-        read_only_fields = ("pk", )
+        read_only_fields = ("pk", 'creation_date', 'update_date')
 
 
 class VendorTagSerializer(serializers.ModelSerializer):
