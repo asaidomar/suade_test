@@ -18,6 +18,7 @@ from core.vendors import models as vendor_models
 from core.products import models as product_models
 from core.orders import models as order_models
 from core.promotions import models as promotion_models
+from core.invoices import models as invoice_models
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -102,3 +103,17 @@ def create_discount() -> promotion_models.Discount:
     """ core.promotions.models.Discount fixture  """
     discount_obj = mixer.blend(promotion_models.Discount)
     return discount_obj
+
+
+@pytest.fixture
+def create_commission() -> invoice_models.Commission:
+    """ core.invoices.models.Commission fixture  """
+    commission_obj = mixer.blend(invoice_models.Commission)
+    return commission_obj
+
+
+@pytest.fixture
+def create_promotion() -> promotion_models.Promotion:
+    """ core.promotions.models.Promotion fixture  """
+    promotion_obj = mixer.blend(promotion_models.Promotion)
+    return promotion_obj

@@ -64,6 +64,8 @@ class Vendor(models.Model):
     phone = models.CharField(_('Vendor Phone number'), max_length=255)
     vat_number = models.CharField(
         _('Vendor VAT Number'), max_length=30, blank=True, null=True)
+    vat_rate = models.PositiveIntegerField(
+        _('Vendor VAT Amount'))  # 20 => 20%
     iban = models.CharField(
         _('Vendor IBAN number'), max_length=30, blank=True, null=True)
 

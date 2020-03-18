@@ -5,6 +5,9 @@
 # date : 2020-03-17
 # project: suade_test
 # author : alisaidomar
+from collections import defaultdict
+from functools import reduce
+from typing import List, Dict
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -12,6 +15,11 @@ from django.utils.translation import ugettext_lazy as _
 
 class Order(models.Model):
     """ Order model """
+
+    AMOUNT_KEYS = ("full_price_amount",
+                   "discounted_amount",
+                   "vat_amount",
+                   "total_amount")
     created_at = models.DateTimeField(
         _('Order creation date'), auto_now_add=True)
     customer = models.ForeignKey('members.Member', on_delete=models.DO_NOTHING)
@@ -20,10 +28,54 @@ class Order(models.Model):
     def __str__(self):
         return f"{self.customer}/{self.created_at}"
 
+    def get_total(self, *dict_prices: Dict):
+        """ Get total against current order.
+        Compute a dict according to keys `total_amount` """
+        return {k: sum([d[k] for d in dict_prices]) for k in self.AMOUNT_KEYS}
+
+    @property
+    def items_price(self) -> Dict:
+        """ Return order price """
+        result = {}
+        items = self.items.prefetch_related("product__vendor", "discount")
+        price = self.get_price(items)
+        result["items"] = price
+        result["total_amount"] = reduce(self.get_total, price.values())
+        return result
+
+    @staticmethod
+    def apply_rate(amount: float, percent_rate: int, positive=True):
+        """ Apply rate to amount"""
+        if positive:
+            return amount * (1 + percent_rate / 100)
+        return amount * (1 - percent_rate / 100)
+
+    def get_price(self, items: List['OrderItem'] = None) -> Dict:
+        """ Return dict of price per item
+
+        Vat amount, discount amount and total
+        """
+        result = defaultdict()
+        for item in (items or self.items.all()):
+            excl_taxes = item.quantity * item.product.price
+            incl_taxes = self.apply_rate(
+                excl_taxes, item.product.vendor.vat_rate)
+            discounted_amount = (item.discount.rate / 100) * incl_taxes
+            result[item.product.code] = {
+                "description": item.product.description,
+                "full_price_amount": incl_taxes,
+                "discounted_amount": discounted_amount,
+                "vat_amount": excl_taxes * item.product.vendor.vat_rate / 100,
+                "product_vat_rate": item.product.vendor.vat_rate,
+                "total_amount": incl_taxes - discounted_amount
+            }
+        return result
+
 
 class OrderItem(models.Model):
     """ Order Item """
-    order = models.ForeignKey('Order', on_delete=models.CASCADE)
+    order = models.ForeignKey(
+        'Order', on_delete=models.CASCADE, related_name="items")
     product = models.ForeignKey(
         'products.Product', on_delete=models.DO_NOTHING)
     discount = models.ForeignKey(

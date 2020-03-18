@@ -8,6 +8,7 @@
 
 import pytest
 from django.urls import reverse
+from mixer.backend.django import mixer
 
 from core.orders import models as order_models
 from ..base import TestBase
@@ -62,6 +63,7 @@ class TestOrderItemAPI(TestBase):
                 "product": create_product.pk,
                 "discount": create_discount.pk
             }
+
         path = reverse("item-list", kwargs={"order_id": create_order.pk})
         self._test_create_resource(
             path,
@@ -84,3 +86,56 @@ class TestOrderItemAPI(TestBase):
         path = reverse("item-detail",
                        kwargs={"pk": create_item.pk})
         self._test_delete_resource(path)
+
+    @staticmethod
+    def get_full_price(products_quantity, products_price,
+                       products_discount_rate, products_vat_rate):
+        price_amount = map(
+            lambda args: args[0] * args[1],
+            zip(products_price, products_quantity)
+        )
+
+        full_price_amount = list(map(
+            lambda args: args[0] * (1 + (args[1] / 100)),
+            zip(price_amount, products_vat_rate)
+        ))
+        discounted_amount = list(map(
+            lambda args: args[0] * float(args[1] / 100),
+            zip(full_price_amount, products_discount_rate)
+        ))
+        total_price = sum(full_price_amount) - sum(discounted_amount)
+        return total_price
+
+    def test_get_price(self, create_order):
+        nb_items = 10
+        discount_rate = 10
+        create_order.vendor.vat_rate = 20
+        product_price = 10
+        quantity = 3
+        vat_rate = 20
+        for i in range(1, nb_items + 1):
+            mixer.blend(
+                order_models.OrderItem,
+                order=create_order,
+                product=mixer.blend(
+                    'products.Product',
+                    price=i * product_price,
+                    code=f"Product_{i}",
+                    description=f"Product {i}",
+                    vendor=mixer.blend('vendors.Vendor', vat_rate=vat_rate)
+                ),
+                discount=mixer.blend(
+                    'promotions.Discount', rate=discount_rate + i),
+                quantity=quantity + i
+            )
+
+        price = create_order.items_price
+        tab = range(1, nb_items + 1)
+        expected_total_amount = self.get_full_price(
+            products_quantity=[i + quantity for i in tab],
+            products_price=[i * product_price for i in tab],
+            products_vat_rate=[vat_rate] * nb_items,
+            products_discount_rate=[discount_rate + i for i in tab]
+        )
+        result_tot = int(price["total_amount"]["total_amount"])
+        assert result_tot == int(expected_total_amount)

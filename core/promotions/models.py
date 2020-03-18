@@ -14,7 +14,7 @@ class Discount(models.Model):
     """ Discount model """
     start_at = models.DateField()
     n_days = models.PositiveIntegerField(default=0)
-    amount = models.PositiveIntegerField()   # percent 50 => 50%
+    rate = models.PositiveIntegerField()   # percent 50 => 50%
 
     @property
     def end_date(self) -> datetime.date:
@@ -22,4 +22,16 @@ class Discount(models.Model):
         return self.start_at + datetime.timedelta(days=self.n_days)
 
     def __str__(self):
-        return str(self.amount)
+        return str(self.rate)
+
+
+class Promotion(models.Model):
+    """ Product promotion """
+    start_at = models.DateField()
+    product = models.OneToOneField("products.Product", on_delete=models.CASCADE)
+    n_days = models.PositiveIntegerField(default=0)
+
+    @property
+    def end_date(self) -> datetime.date:
+        """ End date """
+        return self.start_at + datetime.timedelta(days=self.n_days)

@@ -128,6 +128,7 @@ class TestVendorAPI(TestBase):
                 'iban': "546667888991001",
                 'categories': [create_category.pk],
                 'tags': [create_tag.pk],
+                "vat_rate": 20
 
             }
             return vendor_data_dict

@@ -61,8 +61,6 @@ THIRD_APPS = [
     'corsheaders',
     'rest_framework',
     'nested_admin',
-    'debug_toolbar'
-
 ]
 
 LOCAL_APPS = [
@@ -70,7 +68,9 @@ LOCAL_APPS = [
     'core.members',
     'core.products',
     'core.promotions',
-    'core.orders'
+    'core.orders',
+    'core.invoices',
+    'core.reports'
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_APPS + LOCAL_APPS

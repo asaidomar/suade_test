@@ -24,7 +24,7 @@ class TestDiscountAPI(TestBase):
             return {
                 "start_at": datetime.now().strftime("%Y-%m-%d"),
                 "n_days": 0,
-                "amount": 0
+                "rate": 0
             }
 
         self._test_create_resource(
@@ -46,7 +46,7 @@ class TestDiscountAPI(TestBase):
     def test_patch_discount(self, create_discount):
         def discount_factory(**kwargs):  # noqa
             return {
-                "amout": create_discount.amount + 10
+                "amout": create_discount.rate + 10
             }
 
         path = reverse("discount-detail",
@@ -60,4 +60,38 @@ class TestDiscountAPI(TestBase):
     def test_delete_discount(self, create_discount):
         path = reverse("discount-detail",
                        kwargs={"pk": create_discount.pk})
+        self._test_delete_resource(path)
+
+
+@pytest.mark.urls('config.urls')
+@pytest.mark.django_db
+class TestPromotionAPI(TestBase):
+    """ core.promotions.models.Promotion API tests """
+
+    def test_create_promotion(self, create_product):
+        def promotion_factory(**kwargs):  # noqa
+            return {
+                "start_at": datetime.now().strftime("%Y-%m-%d"),
+                "product": create_product.pk
+            }
+
+        self._test_create_resource(
+            reverse("promotion-list"),
+            promotion_models.Promotion,
+            promotion_factory
+        )
+
+    def test_get_promotions(self, create_promotion):
+        ret = self._test_get_resource(reverse("promotion-list"))
+        assert create_promotion.pk in [m['id'] for m in ret.json()]
+
+    def test_get_promotion(self, create_promotion):
+        path = reverse("promotion-detail",
+                       kwargs={"pk": create_promotion.pk})
+        ret = self._test_get_resource(path)
+        assert ret.json()['id'] == create_promotion.pk
+
+    def test_delete_promotion(self, create_promotion):
+        path = reverse("promotion-detail",
+                       kwargs={"pk": create_promotion.pk})
         self._test_delete_resource(path)

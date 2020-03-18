@@ -15,7 +15,6 @@ swagger_info = openapi.Info(
 
 schema_view = get_schema_view(
     swagger_info,
-    validators=['ssv', 'flex'],
     public=True,
     permission_classes=(permissions.AllowAny,),
 )
@@ -47,6 +46,8 @@ urlpatterns = [
     url(r'^rest/', include('core.products.urls')),
     url(r'^rest/', include('core.orders.urls')),
     url(r'^rest/', include('core.promotions.urls')),
+    url(r'^rest/', include('core.invoices.urls')),
+    url(r'^rest/', include('core.reports.urls')),
 ]
 
 if settings.DEBUG:
