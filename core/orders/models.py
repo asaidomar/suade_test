@@ -12,6 +12,8 @@ from typing import List, Dict
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+import core.promotions.models
+
 
 class Order(models.Model):
     """ Order model """
@@ -61,7 +63,12 @@ class Order(models.Model):
             incl_taxes = self.apply_rate(
                 excl_taxes, item.product.vendor.vat_rate)
             discounted_amount = (item.discount.rate / 100) * incl_taxes
+            try:
+                promotion_id = item.product.promotion.id
+            except core.promotions.models.Promotion.DoesNotExist:  # noqa
+                promotion_id = 0
             result[item.product.code] = {
+                "promotion": promotion_id,
                 "description": item.product.description,
                 "full_price_amount": incl_taxes,
                 "discounted_amount": discounted_amount,

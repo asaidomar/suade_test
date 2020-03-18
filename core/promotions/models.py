@@ -28,7 +28,10 @@ class Discount(models.Model):
 class Promotion(models.Model):
     """ Product promotion """
     start_at = models.DateField()
-    product = models.OneToOneField("products.Product", on_delete=models.CASCADE)
+    product = models.OneToOneField(
+        "products.Product",
+        on_delete=models.CASCADE,
+        related_name="promotion")
     n_days = models.PositiveIntegerField(default=0)
 
     @property

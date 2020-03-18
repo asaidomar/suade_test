@@ -1,4 +1,5 @@
-from typing import List, Dict
+from collections import defaultdict
+from typing import List, Dict, Tuple
 
 from django.db import models
 from django.utils.functional import cached_property
@@ -16,6 +17,7 @@ class Report(models.Model):
             "orders__items__product",
             "orders__items__discount",
             "orders__vendor__commission",
+            "orders__items__product__promotion"
         )
 
     @property
@@ -27,7 +29,7 @@ class Report(models.Model):
     @property
     def items_count(self):
         """ Items count for day self.create_at """
-        return sum(i["orders__items__quantity"] for i in self.items)
+        return sum(i["orders__items__quantity"] or 0 for i in self.items)
 
     @property
     def consumers(self):
@@ -40,7 +42,7 @@ class Report(models.Model):
         """ Consumer Count for the day create_at """
         return self.consumers.count()
 
-    @cached_property   # instance cached
+    @cached_property  # instance cached
     def items_price(self) -> List[Dict]:
         """ list of core.orders.models.Order.items_price one per order.
 
@@ -68,11 +70,14 @@ class Report(models.Model):
             create_at=self.create_at).values(
             "orders__items__discount__rate", "orders__items__quantity")
 
-        tot = sum(d["orders__items__quantity"] for d in discounts)
+        tot = sum(d["orders__items__quantity"] or 0 for d in discounts)
         rates = sum(
-            d["orders__items__quantity"] * d["orders__items__discount__rate"]
+            (d["orders__items__quantity"] or 0) *
+            (d["orders__items__discount__rate"] or 0)
             for d in discounts
         )
+        if tot == 0:
+            return 0
         return rates / tot
 
     @property
@@ -82,4 +87,86 @@ class Report(models.Model):
             i["total_amount"]["total_amount"] for i in self.items_price
         ])
         n_order = len(self.items_price)
-        return total/n_order
+        if n_order == 0:
+            return 0
+        return total / n_order
+
+    @cached_property
+    def commissions_vendor(self) -> Tuple[Dict, int]:
+        """ Per vendor list of commission amount;
+        Make a groupby-like against order.vendor.pk
+        """
+        result = defaultdict(list)
+        tot = 0
+        for order, amount_dict in self.iter_orders:
+            result[order.vendor.pk].append(amount_dict)
+            tot += amount_dict['commission_amount']
+        return result, tot
+
+    @property
+    def commissions_amount(self):
+        """ Total commission for the day """
+        result, tot = self.commissions_vendor
+        return tot
+
+    @property
+    def avg_commissions(self):
+        """ Average commission peramount for the day """
+        result, tot = self.commissions_vendor
+        return tot/len(self.items_price)
+
+    @property
+    def iter_orders(self):
+        """ For each order related to current report get amount of commission"""
+        reports = self.prefetched_query.filter(
+            create_at=self.create_at)
+        orders = reports.first().orders.all()
+        tot = 0
+        for order in orders:
+            order_total = order.items_price["total_amount"]["total_amount"]
+            commission_rate = order.vendor.commission.rate
+            commission_amount = order_total * (commission_rate / 100)
+            current = {
+                "total_amount": order_total,
+                "commission_rate": commission_rate,
+                "commission_amount": commission_amount
+            }
+            tot += commission_amount
+            yield order, current
+
+    @property
+    def commission_item(self) -> Dict:
+        """ Average commission amount per promotion for the day """
+        result = defaultdict(list)
+        for order, amount_dict in self.iter_orders:
+            for item_id, item_price_dict in order.items_price["items"].items():
+                order_total = item_price_dict["total_amount"]
+                commission_rate = order.vendor.commission.rate
+                commission_amount = order_total * (commission_rate / 100)
+                current = {
+                    "total_amount": order_total,
+                    "commission_rate": commission_rate,
+                    "commission_amount": commission_amount
+                }
+                result[item_price_dict["promotion"]].append(current)
+
+        return result
+
+    @property
+    def commission_promotion(self):
+        """ Commission amount per promotion for the day """
+        result = dict()
+        for promotion, amount_dict in self.commission_item.items():
+            result[promotion] = sum(
+                d["commission_amount"] for d in amount_dict
+            )
+        return result
+
+    @property
+    def commission(self):
+        """ Commmison property """
+        return {
+            "promotion": self.commission_promotion,
+            "total": self.commissions_amount,
+            "order_average": self.avg_commissions,
+        }
