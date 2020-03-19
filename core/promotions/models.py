@@ -26,15 +26,28 @@ class Discount(models.Model):
 
 
 class Promotion(models.Model):
+    """ Promotion model """
+    n_days = models.PositiveIntegerField(default=0)
+    name = models.CharField(max_length=50)
+    start_at = models.DateField()
+
+    @property
+    def end_date(self) -> datetime.date:
+        """ End date """
+        return self.start_at + datetime.timedelta(days=self.n_days)
+
+    def __str__(self):
+        return str(self.name)
+
+
+class ProductPromotion(models.Model):
     """ Product promotion """
     start_at = models.DateField()
     product = models.OneToOneField(
         "products.Product",
         on_delete=models.CASCADE,
         related_name="promotion")
-    n_days = models.PositiveIntegerField(default=0)
+    promotion = models.ForeignKey('Promotion', on_delete=models.CASCADE)
 
-    @property
-    def end_date(self) -> datetime.date:
-        """ End date """
-        return self.start_at + datetime.timedelta(days=self.n_days)
+    def __str__(self):
+        return f"{self.promotion}/{self.product}"

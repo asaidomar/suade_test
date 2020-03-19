@@ -22,3 +22,9 @@ class OrderItemAdmin(admin.TabularInline):
 class OrderAdmin(admin.ModelAdmin):
     """ Order Admin """
     inlines = [OrderItemAdmin]
+
+
+@admin.register(product_models.OrderItem)
+class OrderItemAdmin(admin.ModelAdmin):
+    """ Order Admin """
+    pass

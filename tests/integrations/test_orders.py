@@ -5,12 +5,14 @@
 # date : 2020-03-17
 # project: suade_test
 # author : alisaidomar
+from datetime import datetime
 
 import pytest
 from django.urls import reverse
 from mixer.backend.django import mixer
 
 from core.orders import models as order_models
+from core.promotions.models import ProductPromotion
 from ..base import TestBase
 
 
@@ -23,7 +25,8 @@ class TestOrderAPI(TestBase):
         def order_factory(**kwargs):  # noqa
             return {
                 "customer": create_member.pk,
-                "vendor": create_vendor.pk
+                "vendor": create_vendor.pk,
+                "created_at": datetime.now().isoformat(sep=" ")
             }
 
         self._test_create_resource(
@@ -106,7 +109,7 @@ class TestOrderItemAPI(TestBase):
         total_price = sum(full_price_amount) - sum(discounted_amount)
         return total_price
 
-    def test_get_price(self, create_order):
+    def test_get_price(self, create_order, create_promotion):
         nb_items = 10
         discount_rate = 10
         create_order.vendor.vat_rate = 20
@@ -114,16 +117,20 @@ class TestOrderItemAPI(TestBase):
         quantity = 3
         vat_rate = 20
         for i in range(1, nb_items + 1):
-            mixer.blend(
-                order_models.OrderItem,
-                order=create_order,
-                product=mixer.blend(
+            product = mixer.blend(
                     'products.Product',
                     price=i * product_price,
                     code=f"Product_{i}",
                     description=f"Product {i}",
                     vendor=mixer.blend('vendors.Vendor', vat_rate=vat_rate)
-                ),
+                )
+            mixer.blend(ProductPromotion,
+                        promotion=create_promotion,
+                        product=product)
+            mixer.blend(
+                order_models.OrderItem,
+                order=create_order,
+                product=product,
                 discount=mixer.blend(
                     'promotions.Discount', rate=discount_rate + i),
                 quantity=quantity + i

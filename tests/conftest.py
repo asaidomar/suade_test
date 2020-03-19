@@ -117,3 +117,12 @@ def create_promotion() -> promotion_models.Promotion:
     """ core.promotions.models.Promotion fixture  """
     promotion_obj = mixer.blend(promotion_models.Promotion)
     return promotion_obj
+
+
+@pytest.fixture
+def create_product_promotion(create_promotion) -> \
+        promotion_models.ProductPromotion:
+    """ core.promotions.models.Promotion fixture  """
+    promotion_obj = mixer.blend(promotion_models.ProductPromotion,
+                                promotion=create_promotion)
+    return promotion_obj

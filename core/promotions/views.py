@@ -27,3 +27,11 @@ class PromotionViewSet(viewsets.ModelViewSet):
     serializer_class = promotion_serializers.PromotionSerializer
     permission_classes = (permissions.IsAuthenticated,)
     queryset = promotion_models.Promotion.objects
+
+
+class ProductPromotionViewSet(viewsets.ModelViewSet):
+    """ Product Promotion view Set """
+    model = promotion_models.ProductPromotion
+    serializer_class = promotion_serializers.ProductPromotionSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    queryset = promotion_models.ProductPromotion.objects

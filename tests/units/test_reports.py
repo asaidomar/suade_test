@@ -14,17 +14,21 @@ from mixer.backend.django import mixer
 from core.invoices.models import Commission
 from core.orders.models import Order, OrderItem
 from core.products.models import Product
-from core.promotions.models import Discount, Promotion
+from core.promotions.models import Discount, Promotion, ProductPromotion
 from core.reports.utils import build_report
 
 
 @pytest.fixture
-def create_report(create_order, create_vendor):
+def create_report(create_order, create_vendor, create_promotion):
     mixer.blend(Commission, rate=10, vendor=create_vendor)
     nb_orders = 10
     orders = mixer.cycle(nb_orders).blend(Order, vendor=create_vendor)
     for order in orders:
         product = mixer.blend(Product)
+
+        mixer.blend(ProductPromotion,
+                    promotion=create_promotion, product=product)
+
         mixer.blend(Promotion, rate=10, product=product)
         mixer.cycle(nb_orders).blend(
             OrderItem,
@@ -115,5 +119,5 @@ def test_commission_per_promotion(create_report):
     product_set = set()
     for order in create_report.orders.all():
         for item in order.items.all():
-            product_set.add(item.product.promotion.id)
+            product_set.add(item.product.promotion.promotion.id)
     assert set(commission_per_promotion.keys()) == product_set

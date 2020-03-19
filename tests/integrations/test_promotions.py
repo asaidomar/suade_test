@@ -72,7 +72,7 @@ class TestPromotionAPI(TestBase):
         def promotion_factory(**kwargs):  # noqa
             return {
                 "start_at": datetime.now().strftime("%Y-%m-%d"),
-                "product": create_product.pk
+                "name": "test"
             }
 
         self._test_create_resource(
@@ -94,4 +94,39 @@ class TestPromotionAPI(TestBase):
     def test_delete_promotion(self, create_promotion):
         path = reverse("promotion-detail",
                        kwargs={"pk": create_promotion.pk})
+        self._test_delete_resource(path)
+
+
+@pytest.mark.urls('config.urls')
+@pytest.mark.django_db
+class TestProductPromotionAPI(TestBase):
+    """ core.promotions.models.Promotion API tests """
+
+    def test_create_promotion(self, create_promotion, create_product):
+        def promotion_factory(**kwargs):  # noqa
+            return {
+                "start_at": datetime.now().strftime("%Y-%m-%d"),
+                "promotion": create_promotion.pk,
+                "product": create_product.pk,
+            }
+
+        self._test_create_resource(
+            reverse("productpromotion-list"),
+            promotion_models.Promotion,
+            promotion_factory
+        )
+
+    def test_get_promotions(self, create_product_promotion):
+        ret = self._test_get_resource(reverse("productpromotion-list"))
+        assert create_product_promotion.pk in [m['id'] for m in ret.json()]
+
+    def test_get_promotion(self, create_product_promotion):
+        path = reverse("productpromotion-detail",
+                       kwargs={"pk": create_product_promotion.pk})
+        ret = self._test_get_resource(path)
+        assert ret.json()['id'] == create_product_promotion.pk
+
+    def test_delete_promotion(self, create_product_promotion):
+        path = reverse("productpromotion-detail",
+                       kwargs={"pk": create_product_promotion.pk})
         self._test_delete_resource(path)

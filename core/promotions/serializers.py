@@ -21,6 +21,16 @@ class DiscountSerializer(serializers.ModelSerializer):
         read_only_fields = ("pk", 'end_date')
 
 
+class ProductPromotionSerializer(serializers.ModelSerializer):
+    """ core.promotions.models.ProductPromotion serializer """
+
+    class Meta:
+        """Meta class information """
+        model = promotion_models.ProductPromotion
+        fields = '__all__'
+        read_only_fields = ("pk", 'end_date')
+
+
 class PromotionSerializer(serializers.ModelSerializer):
     """ core.promotions.models.Promotion serializer """
     end_date = serializers.ReadOnlyField()

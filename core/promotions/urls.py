@@ -15,6 +15,7 @@ router = DefaultRouter()
 
 router.register(r'discounts', views.DiscountViewSet)
 router.register(r'promotions', views.PromotionViewSet)
+router.register(r'products_promotion', views.ProductPromotionViewSet)
 
 urlpatterns = [
     url(r'^', include(router.urls)),

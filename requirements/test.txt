@@ -1,7 +1,6 @@
 -r ./base.txt
 pytest
 pytest-django
-mixer
 pycodestyle
 pyflakes
 pytest-flake8
