@@ -15,3 +15,4 @@ djangorestframework-recursive
 pyyaml
 djangorestframework-camel-case
 swagger_spec_validator
+gunicorn

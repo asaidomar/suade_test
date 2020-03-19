@@ -20,6 +20,9 @@ from core.orders.models import Order
 from core.reports import serializers as report_serializers
 from core.reports.models import Report
 from core.reports.utils import build_report
+from logger import get_logger
+
+logger = get_logger(__file__)
 
 
 class StandardResultsSetPagination(PageNumberPagination):
@@ -33,7 +36,6 @@ class ReportView(generics.GenericAPIView):
     """ Report API """
     serializer_class = report_serializers.ReportSerializer
     permission_classes = (permissions.IsAuthenticated,)
-    pagination_class = StandardResultsSetPagination
 
     day_param = openapi.Parameter(
         'day', openapi.IN_QUERY,
@@ -42,8 +44,9 @@ class ReportView(generics.GenericAPIView):
         default=datetime.now().strftime("%Y-%m-%d"))
 
     def get_queryset(self):
-        day = self.request.query_params.get('day')
-        orders = Order.objects.filter(created_at=day)
+        day = self.request.query_params.get(
+            'day', datetime.now().strftime("%Y-%m-%d"))
+        orders = Order.objects.filter(created_at__date=day)
         return orders
 
     @swagger_auto_schema(
@@ -54,10 +57,14 @@ class ReportView(generics.GenericAPIView):
         })
     def get(self, request, *args, **kwargs):
         try:
-            day = self.request.query_params.get('day')
+            day = self.request.query_params.get(
+                'day', datetime.now().strftime("%Y-%m-%d"))
+            logger.info(f"Getting report for {day}...")
             if report := Report.objects.filter(create_at=day).first():  # noqa
+                logger.info(f"Report exists from db")
                 return Response(self.get_serializer(report).data)
             orders = self.get_queryset()
+            logger.info("Generate report from orders...")
             report = build_report(orders, day)
             return Response(self.get_serializer(report).data)
         except (ValidationError,

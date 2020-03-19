@@ -9,7 +9,10 @@ from core.reports.models import Report
 
 
 def build_report(orders, created_at):
+    """ Create report obj """
     report = Report(create_at=created_at)
     report.save()
-    report.orders.set(orders)
+    for o in orders:
+        report.orders.add(o)
+    report.save()
     return report

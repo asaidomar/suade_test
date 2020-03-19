@@ -1,0 +1,46 @@
+# Use postgres/example user/password credentials
+version: '3'
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx.local
+    ports:
+      - "80:80"
+    volumes:
+      - ./:/app/
+      - ./etc/nginx:/etc/nginx/conf.d
+      - ./core/media:/srv/media
+    depends_on:
+      - app
+    env_file:
+      - .env
+
+  db:
+    restart: always
+    hostname: db.local
+    container_name: db.local
+    image: postgres
+    env_file:
+      - .env
+    volumes:
+      - ./postgres-data/postgres-local:/var/lib/postgresql/data
+    expose:
+      - "5432"
+  app:
+    env_file:
+      - .env
+    hostname: app.local
+    container_name: app.local
+    restart: always
+    build:
+      context: .
+      args:
+        app_env: ${app_env}
+    expose:
+      - "9090"
+    depends_on:
+      - db
+    volumes:
+    - ./:/app/
+    - ./core/media:/srv/media
+    entrypoint: /app/scripts/entry_point.sh

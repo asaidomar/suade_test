@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.conf.urls import include, url
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
@@ -49,9 +48,3 @@ urlpatterns = [
     url(r'^rest/', include('core.invoices.urls')),
     url(r'^rest/', include('core.reports.urls')),
 ]
-
-if settings.DEBUG:
-    if "debug_toolbar" in settings.INSTALLED_APPS:
-        import debug_toolbar
-
-        urlpatterns += [url(r"^__debug__/", include(debug_toolbar.urls))]

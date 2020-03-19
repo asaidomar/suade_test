@@ -111,3 +111,6 @@ dmypy.json
 # .env file
 .env
 *.sqlite3
+postgres-data
+logs
+core/media

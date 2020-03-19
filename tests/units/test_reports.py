@@ -111,7 +111,7 @@ def test_commissions_amount(create_report):
 
 @pytest.mark.django_db
 def test_commission_per_promotion(create_report):
-    commission_per_promotion = create_report.commission_promotion
+    commission_per_promotion = create_report.commissions_promotions
     product_set = set()
     for order in create_report.orders.all():
         for item in order.items.all():

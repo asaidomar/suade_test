@@ -16,3 +16,6 @@ class Commission(models.Model):
     vendor = models.OneToOneField("vendors.Vendor",
                                   on_delete=models.DO_NOTHING,
                                   related_name='commission')
+
+    def __str__(self):
+        return f"{self.vendor}/{self.rate}"

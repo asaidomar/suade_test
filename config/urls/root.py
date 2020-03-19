@@ -1,14 +1,9 @@
 from django.conf import settings
 from django.contrib import admin
-from django.shortcuts import redirect
 from django.urls import path
 from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.views import defaults as default_views
-
-
-def home(request):
-    return redirect("/static/front/index.html")
 
 
 _urlpatterns = [

@@ -4,11 +4,18 @@ from typing import List, Dict, Tuple
 from django.db import models
 from django.utils.functional import cached_property
 
+from logger import get_logger
+
+logger = get_logger(__file__)
+
 
 class Report(models.Model):
     """ Report model """
     create_at = models.DateField()
     orders = models.ManyToManyField("orders.Order")
+
+    def __str__(self):
+        return f"{self.create_at}"
 
     @property
     def prefetched_query(self):
@@ -113,7 +120,7 @@ class Report(models.Model):
     def avg_commissions(self):
         """ Average commission peramount for the day """
         result, tot = self.commissions_vendor
-        return tot/len(self.items_price)
+        return tot / len(self.items_price)
 
     @property
     def iter_orders(self):
@@ -124,7 +131,12 @@ class Report(models.Model):
         tot = 0
         for order in orders:
             order_total = order.items_price["total_amount"]["total_amount"]
-            commission_rate = order.vendor.commission.rate
+            try:
+                commission_rate = order.vendor.commission.rate
+            except Exception as error:
+                logger.error(
+                    f"Error '{error}' while getting {order.vendor} commission")
+                commission_rate = 0
             commission_amount = order_total * (commission_rate / 100)
             current = {
                 "total_amount": order_total,
@@ -135,13 +147,19 @@ class Report(models.Model):
             yield order, current
 
     @property
-    def commission_item(self) -> Dict:
+    def commissions_items(self) -> Dict:
         """ Average commission amount per promotion for the day """
         result = defaultdict(list)
         for order, amount_dict in self.iter_orders:
             for item_id, item_price_dict in order.items_price["items"].items():
                 order_total = item_price_dict["total_amount"]
-                commission_rate = order.vendor.commission.rate
+                try:
+                    commission_rate = order.vendor.commission.rate
+                except Exception as error:
+                    logger.error(
+                        f"Error '{error}' while getting "
+                        f"{order.vendor} commission")
+                    commission_rate = 0
                 commission_amount = order_total * (commission_rate / 100)
                 current = {
                     "total_amount": order_total,
@@ -153,20 +171,20 @@ class Report(models.Model):
         return result
 
     @property
-    def commission_promotion(self):
+    def commissions_promotions(self):
         """ Commission amount per promotion for the day """
         result = dict()
-        for promotion, amount_dict in self.commission_item.items():
+        for promotion, amount_dict in self.commissions_items.items():
             result[promotion] = sum(
                 d["commission_amount"] for d in amount_dict
             )
         return result
 
     @property
-    def commission(self):
-        """ Commmison property """
+    def commissions(self):
+        """ Commission property """
         return {
-            "promotion": self.commission_promotion,
+            "promotion": self.commissions_promotions,
             "total": self.commissions_amount,
             "order_average": self.avg_commissions,
         }

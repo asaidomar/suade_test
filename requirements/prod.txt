@@ -1,2 +1,2 @@
 -r ./base.txt
-gunicorn
+psycopg2-binary

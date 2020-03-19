@@ -14,3 +14,9 @@ from core.promotions import models as promotion_models
 class DiscountAdmin(admin.ModelAdmin):
     """ Discount Admin """
     pass
+
+
+@admin.register(promotion_models.Promotion)
+class PromotionAdmin(admin.ModelAdmin):
+    """ Discount Admin """
+    pass

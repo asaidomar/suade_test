@@ -12,11 +12,12 @@ from core.reports.models import Report
 
 class ReportSerializer(serializers.ModelSerializer):
     """ Report serializer  """
-    items_count = serializers.ReadOnlyField()
-    consumer_count = serializers.ReadOnlyField()
-    discounts_amount_sum = serializers.ReadOnlyField()
-    avg_discount_rate = serializers.ReadOnlyField()
-    avg_order_total = serializers.ReadOnlyField()
+    items = serializers.ReadOnlyField(source="items_count")
+    consumers = serializers.ReadOnlyField(source="consumer_count")
+    total_discount_amount = serializers.ReadOnlyField(
+        source="discounts_amount_sum")
+    discount_rate_avg = serializers.ReadOnlyField(source="avg_discount_rate")
+    order_total_avg = serializers.ReadOnlyField(source="avg_order_total")
 
     commissions = serializers.ReadOnlyField()
 
@@ -25,10 +26,10 @@ class ReportSerializer(serializers.ModelSerializer):
         model = Report
         fields = (
             "create_at",
-            "items_count",
-            "consumer_count",
-            "discounts_amount_sum",
-            "avg_discount_rate",
-            "avg_order_total",
-            "commissions",
+            "items",
+            "consumers",
+            "total_discount_amount",
+            "discount_rate_avg",
+            "order_total_avg",
+            "commissions"
         )
