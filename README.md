@@ -1,4 +1,4 @@
-Django API backend for a eshop, this application was built in order to responds to a test.
+Django API backend for an eshop, this application was built in order to responds to a test.
 
 
 ## Installation
@@ -8,7 +8,7 @@ cd suade_test
 export app_env=prod   # could also be 'test' or 'local'
 docker-compose up
 ```
-## load test data
+## Load test data
 Once the application is started
 ```
 docker exec -it app.local python manage.py load_data
