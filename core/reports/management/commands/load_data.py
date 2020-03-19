@@ -5,6 +5,7 @@
 # date : 2020-03-19
 # project: suade_test
 # author : alisaidomar
+# flake : noqa
 import csv
 import pathlib
 from datetime import datetime

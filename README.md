@@ -9,7 +9,7 @@ export app_env=prod   # could also be 'test' or 'local'
 docker-compose up
 ```
 ## load test data
-Once the application is started (could be run only once because pk conflict)
+Once the application is started
 ```
 docker exec -it app.local python manage.py load_data
 ```
@@ -29,4 +29,10 @@ http://localhost/backend/admin (admin:admin)
 
 ## Access to report
 http://localhost/rest/reports?day=2019-09-29
+
+## Screenshots
+Report result
+![Report](./doc/reports.png)
+
+
 
