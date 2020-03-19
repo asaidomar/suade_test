@@ -22,7 +22,7 @@ class Product(models.Model):
         _("Product Brand"), max_length=255, blank=True, null=True)
     description = models.CharField(
         _("Product description"), max_length=255)
-    price = models.PositiveSmallIntegerField(_("Product price, excl. taxes"))
+    price = models.PositiveIntegerField(_("Product price, excl. taxes"))
     vendor = models.ForeignKey(
         "vendors.Vendor", on_delete=models.DO_NOTHING)
     currency = models.CharField(_("Product Currency"), max_length=15)

@@ -208,8 +208,8 @@ CACHES = {
 
 # drf-yasg
 SWAGGER_SETTINGS = {
-    'LOGIN_URL': "/accounts/login/",
-    'LOGOUT_URL': '/accounts/login/',
+    'LOGIN_URL': "/backend/accounts/login/",
+    'LOGOUT_URL': '/backend/accounts/logout/',
     'PERSIST_AUTH': True,
     'REFETCH_SCHEMA_WITH_AUTH': True,
     'REFETCH_SCHEMA_ON_LOGOUT': True,

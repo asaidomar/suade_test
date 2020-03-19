@@ -120,7 +120,9 @@ class Report(models.Model):
     def avg_commissions(self):
         """ Average commission peramount for the day """
         result, tot = self.commissions_vendor
-        return tot / len(self.items_price)
+        if len(self.items_price):
+            return tot / len(self.items_price)
+        return 0
 
     @property
     def iter_orders(self):
