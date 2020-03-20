@@ -26,6 +26,7 @@ class Product(models.Model):
     vendor = models.ForeignKey(
         "vendors.Vendor", on_delete=models.DO_NOTHING)
     currency = models.CharField(_("Product Currency"), max_length=15)
+    vat_rate = models.FloatField()
 
     def __str__(self):
         return f"{self.description}"

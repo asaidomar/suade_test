@@ -27,7 +27,8 @@ class TestProductAPI(TestBase):
                 "description": "string",
                 "price": 10,
                 "currency": "Euros",
-                "vendor": create_vendor.pk
+                "vendor": create_vendor.pk,
+                'vat_rate': "0.10"
             }
 
         self._test_create_resource(

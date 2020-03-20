@@ -44,11 +44,11 @@ class Order(models.Model):
         return result
 
     @staticmethod
-    def apply_rate(amount: float, percent_rate: int, positive=True):
+    def apply_rate(amount: float, rate: float, positive=True):
         """ Apply rate to amount"""
         if positive:
-            return amount * (1 + percent_rate / 100)
-        return amount * (1 - percent_rate / 100)
+            return amount * (1 + rate)
+        return amount * (1 - rate)
 
     def get_price(self, items: List['OrderItem'] = None) -> Dict:
         """ Return dict of price per item
@@ -59,8 +59,8 @@ class Order(models.Model):
         for item in (items or self.items.all()):
             excl_taxes = item.quantity * item.product.price
             incl_taxes = self.apply_rate(
-                excl_taxes, item.product.vendor.vat_rate)
-            discounted_amount = (item.discount.rate / 100) * incl_taxes
+                excl_taxes, item.product.vat_rate)
+            discounted_amount = float(item.discount.rate) * float(incl_taxes)
             try:
                 promotion_id = item.product.promotion.promotion.id
             except Exception as error:  # noqa
@@ -70,8 +70,8 @@ class Order(models.Model):
                 "description": item.product.description,
                 "full_price_amount": incl_taxes,
                 "discounted_amount": discounted_amount,
-                "vat_amount": excl_taxes * item.product.vendor.vat_rate / 100,
-                "product_vat_rate": item.product.vendor.vat_rate,
+                "vat_amount": excl_taxes * item.product.vat_rate,
+                "product_vat_rate": item.product.vat_rate,
                 "total_amount": incl_taxes - discounted_amount
             }
         return result

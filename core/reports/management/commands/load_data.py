@@ -91,7 +91,7 @@ def create_orders_items():
     with vendor_file.open() as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            discount_rate = int(float(row["discount_rate"]) * 100)
+            discount_rate = float(row["discount_rate"])
             discount, created = promotion_models.Discount.objects.get_or_create(
                 rate=discount_rate, n_days=100,
                 start_at="1900-01-01")
@@ -106,9 +106,10 @@ def create_orders_items():
                 product.save()
             except:
                 continue
-            product.vendor.vat_rate = int(float(row["product_vat_rate"]) * 100)
+            product.vendor.vat_rate = float(row["product_vat_rate"])
             product.vendor.save()
             product.price = row["product_price"]
+            product.vat_rate = float(row["product_vat_rate"])
             product.save()
             try:
                 item, created = order_models.OrderItem.objects.get_or_create(

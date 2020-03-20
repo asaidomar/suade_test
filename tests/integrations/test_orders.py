@@ -99,11 +99,11 @@ class TestOrderItemAPI(TestBase):
         )
 
         full_price_amount = list(map(
-            lambda args: args[0] * (1 + (args[1] / 100)),
+            lambda args: args[0] * (1 + args[1]),
             zip(price_amount, products_vat_rate)
         ))
         discounted_amount = list(map(
-            lambda args: args[0] * float(args[1] / 100),
+            lambda args: args[0] * args[1],
             zip(full_price_amount, products_discount_rate)
         ))
         total_price = sum(full_price_amount) - sum(discounted_amount)
@@ -111,17 +111,18 @@ class TestOrderItemAPI(TestBase):
 
     def test_get_price(self, create_order, create_promotion):
         nb_items = 10
-        discount_rate = 10
-        create_order.vendor.vat_rate = 20
+        discount_rate = 0.10
+        create_order.vendor.vat_rate = 0.20
         product_price = 10
         quantity = 3
-        vat_rate = 20
+        vat_rate = 0.20
         for i in range(1, nb_items + 1):
             product = mixer.blend(
                     'products.Product',
                     price=i * product_price,
                     code=f"Product_{i}",
                     description=f"Product {i}",
+                    vat_rate=vat_rate,
                     vendor=mixer.blend('vendors.Vendor', vat_rate=vat_rate)
                 )
             mixer.blend(ProductPromotion,

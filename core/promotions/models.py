@@ -14,7 +14,7 @@ class Discount(models.Model):
     """ Discount model """
     start_at = models.DateField()
     n_days = models.PositiveIntegerField(default=0)
-    rate = models.PositiveIntegerField()   # percent 50 => 50%
+    rate = models.FloatField()  # 0.5222030877456142
 
     @property
     def end_date(self) -> datetime.date:
