@@ -70,3 +70,9 @@ class ReportView(generics.GenericAPIView):
         except (ValidationError,
                 django.core.exceptions.ValidationError) as error:
             return Response(data=error, status=400)
+
+
+class ReportLiteView(ReportView):
+    """ Report API """
+    serializer_class = report_serializers.ReportSerializer2
+    permission_classes = (permissions.IsAuthenticated,)

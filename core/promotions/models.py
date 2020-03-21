@@ -43,10 +43,10 @@ class Promotion(models.Model):
 class ProductPromotion(models.Model):
     """ Product promotion """
     start_at = models.DateField()
-    product = models.OneToOneField(
+    product = models.ForeignKey(
         "products.Product",
         on_delete=models.CASCADE,
-        related_name="promotion")
+        related_name="promotions")
     promotion = models.ForeignKey('Promotion', on_delete=models.CASCADE)
 
     def __str__(self):

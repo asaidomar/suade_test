@@ -12,4 +12,6 @@ from core.reports import views
 urlpatterns = [
     path('reports', views.ReportView.as_view(),
          name='report'),
+    path('reports_lite', views.ReportLiteView.as_view(),
+         name='report_lite',),
 ]

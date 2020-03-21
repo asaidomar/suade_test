@@ -28,3 +28,10 @@ class OrderAdmin(admin.ModelAdmin):
 class OrderItemAdmin(admin.ModelAdmin):
     """ Order Admin """
     pass
+
+
+@admin.register(product_models.OrderItem2)
+class OrderItemLiteAdmin(admin.ModelAdmin):
+    """ Order Admin """
+
+    search_fields = ['product_description']

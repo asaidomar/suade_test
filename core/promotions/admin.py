@@ -20,3 +20,9 @@ class DiscountAdmin(admin.ModelAdmin):
 class PromotionAdmin(admin.ModelAdmin):
     """ Discount Admin """
     pass
+
+
+@admin.register(promotion_models.ProductPromotion)
+class ProductPromotionAdmin(admin.ModelAdmin):
+    """ Discount Admin """
+    pass

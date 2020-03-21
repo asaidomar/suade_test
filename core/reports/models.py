@@ -4,6 +4,8 @@ from typing import List, Dict, Tuple
 from django.db import models
 from django.utils.functional import cached_property
 
+from core.orders.models import OrderItem2
+
 from logger import get_logger
 
 logger = get_logger(__file__)
@@ -26,6 +28,8 @@ class Report(models.Model):
             "orders__vendor__commission",
             "orders__items__product__promotion"
         )
+
+
 
     @property
     def items(self):
@@ -58,6 +62,12 @@ class Report(models.Model):
             create_at=self.create_at)
         return [o.items_price for o in reports.first().orders.all()]
 
+    @cached_property
+    def items2(self):
+        """ Return list of OrderItem2 related to the current report """
+        items = OrderItem2.objects.filter(order_id__in=self.order_ids)
+        return items
+
     @property
     def discounts_amount(self):
         """ Discounts amount for the day create_at """
@@ -69,6 +79,11 @@ class Report(models.Model):
     def discounts_amount_sum(self):
         """ The count """
         return sum(self.discounts_amount)
+
+    @property
+    def discounts_amount_sum2(self):
+        """ The count """
+        return sum(i.get_price()["discounted_amount"] for i in self.items2)
 
     @property
     def avg_discount_rate(self):
@@ -98,6 +113,29 @@ class Report(models.Model):
             return 0
         return total / n_order
 
+    @property
+    def order_ids(self):
+        """ Return id or self.orders """
+        return [o.id for o in self.orders.all()]
+
+    @property
+    def items_count2(self):
+        """ Return id or self.orders """
+        return sum(i["quantity"] for i in self.items2.values("quantity"))
+
+    @property
+    def avg_order_total2(self):
+        """ The average order total for the day create_at """
+        result = defaultdict(list)
+
+        for item in self.items2:
+            result[item.order_id].append(item.get_price())
+
+        tot_result = list()
+        for k, items_list in result.items():
+            tot_result.append(sum(item["total_amount"] for item in items_list))
+        return sum(tot_result)/len(tot_result)
+
     @cached_property
     def commissions_vendor(self) -> Tuple[Dict, int]:
         """ Per vendor list of commission amount;
@@ -118,7 +156,7 @@ class Report(models.Model):
 
     @property
     def avg_commissions(self):
-        """ Average commission peramount for the day """
+        """ Average commission per order for the day """
         result, tot = self.commissions_vendor
         if len(self.items_price):
             return tot / len(self.items_price)
@@ -162,7 +200,7 @@ class Report(models.Model):
                         f"Error '{error}' while getting "
                         f"{order.vendor} commission")
                     commission_rate = 0
-                commission_amount = order_total * (commission_rate / 100)
+                commission_amount = order_total * commission_rate
                 current = {
                     "total_amount": order_total,
                     "commission_rate": commission_rate,
@@ -189,4 +227,45 @@ class Report(models.Model):
             "promotion": self.commissions_promotions,
             "total": self.commissions_amount,
             "order_average": self.avg_commissions,
+        }
+
+    @property
+    def commissions_amount2(self):
+        """ Return commission_amount """
+        return sum(i.get_price()["commission_amount"]for i in self.items2)
+
+    @property
+    def avg_commissions2(self):
+        """ Average commission per order for the day """
+        result = defaultdict(list)
+
+        for item in self.items2:
+            result[item.order_id].append(item.get_price())
+
+        tot_result = list()
+        for k, items_list in result.items():
+            tot_result.append(
+                sum(item["commission_amount"] for item in items_list)
+            )
+        return sum(tot_result)/len(tot_result)
+
+    @property
+    def commissions_promotions2(self):
+        """ Commission amount per promotion for the day """
+        result = defaultdict(int)
+
+        for item in self.items2:
+            dict_price = item.get_price()
+            for promotion_id in dict_price["promotions"]:
+                result[promotion_id] += dict_price["commission_amount"]
+
+        return result
+
+    @property
+    def commissions2(self):
+        """ Commission property """
+        return {
+            "promotion": self.commissions_promotions2,
+            "total": self.commissions_amount2,
+            "order_average": self.avg_commissions2,
         }

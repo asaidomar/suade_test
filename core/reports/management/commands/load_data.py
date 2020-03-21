@@ -84,6 +84,32 @@ def create_products():
             print(f"Product {p} generated.")
 
 
+def create_orders_items2():
+    print("Generate Order items...")
+    vendor_file = data_folder.joinpath("order_lines.csv")
+
+    with vendor_file.open() as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            product = product_models.Product.objects.get(id=row["product_id"])
+            order = order_models.Order.objects.get(id=row["order_id"])
+            product.vendor = order.vendor
+            product.save()
+
+            item, created = order_models.OrderItem2.objects.get_or_create(
+                order_id=row["order_id"],
+                product_id=row["product_id"],
+                product_description=row["product_description"],
+                product_price=row["product_price"],
+                discount_rate=row["discount_rate"],
+                quantity=row["quantity"],
+                product_vat_rate=row["product_vat_rate"],
+                vendor_id=order.vendor_id,
+                created_at=order.created_at
+            )
+            print(f"Order Item {item} generated.")
+
+
 def create_orders_items():
     print("Generate Order items...")
     vendor_file = data_folder.joinpath("order_lines.csv")
@@ -98,6 +124,11 @@ def create_orders_items():
             try:
                 product = product_models.Product.objects.get(
                     id=row["product_id"])
+                product.vendor.vat_rate = float(row["product_vat_rate"])
+                product.vendor.save()
+                product.price = row["product_price"]
+                product.vat_rate = float(row["product_vat_rate"])
+                product.save()
             except:
                 continue
             try:
@@ -106,11 +137,7 @@ def create_orders_items():
                 product.save()
             except:
                 continue
-            product.vendor.vat_rate = float(row["product_vat_rate"])
-            product.vendor.save()
-            product.price = row["product_price"]
-            product.vat_rate = float(row["product_vat_rate"])
-            product.save()
+
             try:
                 item, created = order_models.OrderItem.objects.get_or_create(
                     order=order,
@@ -135,7 +162,7 @@ def create_products_promotions():
                 id=row["promotion_id"])
             try:
                 pp, created = promotion_models.ProductPromotion.objects.get_or_create(
-                    start_at="1900-01-01",
+                    start_at=row["date"],
                     promotion=promotion,
                     product=product,
                 )
@@ -167,14 +194,10 @@ def create_commission():
         reader = csv.DictReader(csvfile)
         for row in reader:
             vendor = vendor_models.Vendor.objects.get(id=row["vendor_id"])
-            rate = int(float(row["rate"]) * 100)
+            rate = float(row["rate"])
             try:
-                com = invoice_models.Commission.objects.filter(
-                        vendor=vendor).first()
-                if not com:
-                    com = invoice_models.Commission(rate=rate, vendor=vendor)
-                com.rate = rate
-                com.save()
+                com, created = invoice_models.Commission.objects.get_or_create(
+                    rate=rate, vendor=vendor, created_at=row["date"])
                 print(f"Commission {com} generated.")
             except:
                 continue
@@ -187,6 +210,7 @@ class Command(BaseCommand):
         create_vendors_orders_cutomers()
         create_products()
         create_orders_items()
+        create_orders_items2()
         create_promotions()
         create_products_promotions()
         create_commission()

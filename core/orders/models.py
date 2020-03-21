@@ -6,11 +6,23 @@
 # project: suade_test
 # author : alisaidomar
 from collections import defaultdict
+from datetime import datetime
 from functools import reduce
 from typing import List, Dict
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+
+from core.invoices.models import Commission
+from core.products.models import Product
+from core.promotions.models import Promotion, ProductPromotion
+
+
+def apply_rate(amount: float, rate: float, positive=True):
+    """ Apply rate to amount"""
+    if positive:
+        return amount * (1 + rate)
+    return amount * (1 - rate)
 
 
 class Order(models.Model):
@@ -43,13 +55,6 @@ class Order(models.Model):
         result["total_amount"] = reduce(self.get_total, price.values())
         return result
 
-    @staticmethod
-    def apply_rate(amount: float, rate: float, positive=True):
-        """ Apply rate to amount"""
-        if positive:
-            return amount * (1 + rate)
-        return amount * (1 - rate)
-
     def get_price(self, items: List['OrderItem'] = None) -> Dict:
         """ Return dict of price per item
 
@@ -58,7 +63,7 @@ class Order(models.Model):
         result = defaultdict()
         for item in (items or self.items.all()):
             excl_taxes = item.quantity * item.product.price
-            incl_taxes = self.apply_rate(
+            incl_taxes = apply_rate(
                 excl_taxes, item.product.vat_rate)
             discounted_amount = float(item.discount.rate) * float(incl_taxes)
             try:
@@ -90,3 +95,63 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.product}/{self.order}"
+
+    def get_promotion(self):
+        """ Get promotion """
+        return self.product.promotions.filter(start_at=self.order.created_at)
+
+
+class OrderItem2(models.Model):
+    """ Order Item to benchmark report metric and response to the test.
+
+    Because the same product could have its price changed over order...
+
+    """
+    created_at = models.DateField(default=datetime.now().strftime("%Y-%m-%d"))
+    order_id = models.CharField(max_length=50)
+    product_id = models.CharField(max_length=50)
+    vendor_id = models.CharField(max_length=50)
+    product_description = models.CharField(max_length=50)
+    product_price = models.FloatField()
+    product_vat_rate = models.FloatField()
+    discount_rate = models.FloatField()
+    quantity = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.product_description}/{self.quantity}"
+
+    def get_promotions(self):
+        """ Get promotion """
+        return Product.objects.get(id=self.product_id).promotions.all()
+
+    def get_commission(self) -> Commission:
+        """ Get commission for the vendor related to the date """
+        return Commission.objects.filter(
+            vendor_id=self.vendor_id, created_at=self.created_at).first()
+
+    def get_price(self) -> Dict:
+        """ Return dict of price """
+        excl_taxes = self.quantity * self.product_price
+        incl_taxes = apply_rate(
+            excl_taxes, self.product_vat_rate)
+        discounted_amount = float(self.discount_rate) * float(incl_taxes)
+
+        try:
+            commission_rate = self.get_commission().rate
+        except Exception as error:  # noqa
+            commission_rate = 0
+
+        total_amount = incl_taxes - discounted_amount
+        commission_amount = float(commission_rate) * float(total_amount)
+
+        return {
+            "promotions": [p.promotion.id for p in self.get_promotions()],
+            "description": self.product_description,
+            "full_price_amount": incl_taxes,
+            "discounted_amount": discounted_amount,
+            "vat_amount": excl_taxes * self.product_vat_rate,
+            "product_vat_rate": self.product_vat_rate,
+            "total_amount": total_amount,
+            "commission_rate": commission_rate,
+            "commission_amount": commission_amount
+        }

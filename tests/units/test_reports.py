@@ -12,7 +12,8 @@ import pytest
 from mixer.backend.django import mixer
 
 from core.invoices.models import Commission
-from core.orders.models import Order, OrderItem
+from core.orders.models import Order, OrderItem, OrderItem2
+
 from core.products.models import Product
 from core.promotions.models import Discount, Promotion, ProductPromotion
 from core.reports.utils import build_report
@@ -30,17 +31,35 @@ def create_report(create_order, create_vendor, create_promotion):
                     promotion=create_promotion, product=product)
 
         mixer.blend(Promotion, rate=10, product=product)
-        mixer.cycle(nb_orders).blend(
+        order_items = mixer.cycle(nb_orders).blend(
             OrderItem,
             order=order,
             quantity=random.randint(1, 100),
             discount=mixer.blend(Discount, rate=20),
             product=product,
         )
+
+        for order_item in order_items:
+            create_orderitem2(order_item)
     report = build_report(
         orders, created_at=datetime.now().strftime("%Y-%m-%d"))
     assert len(report.orders.all()) == nb_orders
     return report
+
+
+def create_orderitem2(order_item: OrderItem):
+    item = OrderItem2(
+        order_id=order_item.order.id,
+        product_id=order_item.product.id,
+        product_description=order_item.product.description,
+        product_price=order_item.product.price,
+        discount_rate=order_item.discount.rate,
+        product_vat_rate=order_item.product.vat_rate,
+        quantity=order_item.quantity,
+        vendor_id=order_item.product.vendor.id
+    )
+    item.save()
+    return item
 
 
 @pytest.mark.django_db
@@ -98,6 +117,18 @@ def test_report_avg_total(create_report):
     )
     expected = expected_sum / create_report.orders.count()
     assert create_report.avg_order_total == expected
+
+
+@pytest.mark.django_db
+def test_report_avg_total2(create_report):
+    expected_sum = sum(
+        [
+            o.items_price["total_amount"]["total_amount"]
+            for o in create_report.orders.all()
+        ]
+    )
+    expected = expected_sum / create_report.orders.count()
+    assert create_report.avg_order_total2 == expected
 
 
 @pytest.mark.django_db
