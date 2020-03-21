@@ -28,7 +28,8 @@ After installation go to http:localhost/swagger or http:localhost/redoc
 http://localhost/backend/admin (admin:admin)
 
 ## Access to report
-http://localhost/rest/reports?day=2019-09-29
+http://localhost:8000/rest/reports_lite?day=2019-08-03
+
 
 ## Screenshots
 Report result

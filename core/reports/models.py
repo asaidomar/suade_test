@@ -25,8 +25,8 @@ class Report(models.Model):
             "orders__customer",
             "orders__items__product",
             "orders__items__discount",
-            "orders__vendor__commission",
-            "orders__items__product__promotion"
+            "orders__vendor__commissions",
+            "orders__items__product__promotions"
         )
 
 
@@ -172,12 +172,12 @@ class Report(models.Model):
         for order in orders:
             order_total = order.items_price["total_amount"]["total_amount"]
             try:
-                commission_rate = order.vendor.commission.rate
+                commission_rate = order.commission.rate
             except Exception as error:
                 logger.error(
                     f"Error '{error}' while getting {order.vendor} commission")
                 commission_rate = 0
-            commission_amount = order_total * (commission_rate / 100)
+            commission_amount = order_total * commission_rate
             current = {
                 "total_amount": order_total,
                 "commission_rate": commission_rate,
@@ -194,7 +194,7 @@ class Report(models.Model):
             for item_id, item_price_dict in order.items_price["items"].items():
                 order_total = item_price_dict["total_amount"]
                 try:
-                    commission_rate = order.vendor.commission.rate
+                    commission_rate = order.commission.rate
                 except Exception as error:
                     logger.error(
                         f"Error '{error}' while getting "
@@ -206,7 +206,8 @@ class Report(models.Model):
                     "commission_rate": commission_rate,
                     "commission_amount": commission_amount
                 }
-                result[item_price_dict["promotion"]].append(current)
+                for p_id in item_price_dict["promotions"]:
+                    result[p_id].append(current)
 
         return result
 

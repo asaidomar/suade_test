@@ -46,6 +46,11 @@ class Order(models.Model):
         return {k: sum([d[k] for d in dict_prices]) for k in self.AMOUNT_KEYS}
 
     @property
+    def commission(self):
+        """ Commission related to vendor """
+        return self.vendor.commissions.filter(created_at=self.created_at).first()
+
+    @property
     def items_price(self) -> Dict:
         """ Return order price """
         result = {}
@@ -66,12 +71,10 @@ class Order(models.Model):
             incl_taxes = apply_rate(
                 excl_taxes, item.product.vat_rate)
             discounted_amount = float(item.discount.rate) * float(incl_taxes)
-            try:
-                promotion_id = item.product.promotion.promotion.id
-            except Exception as error:  # noqa
-                promotion_id = 0
             result[item.product.code] = {
-                "promotion": promotion_id,
+                "promotions": [
+                    p.promotion.id for p in item.product.promotions.all()
+                ],
                 "description": item.product.description,
                 "full_price_amount": incl_taxes,
                 "discounted_amount": discounted_amount,
