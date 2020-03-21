@@ -235,21 +235,6 @@ class Report(models.Model):
         return sum(i.get_price()["commission_amount"]for i in self.items2)
 
     @property
-    def avg_commissions2(self):
-        """ Average commission per order for the day """
-        result = defaultdict(list)
-
-        for item in self.items2:
-            result[item.order_id].append(item.get_price())
-
-        tot_result = list()
-        for k, items_list in result.items():
-            tot_result.append(
-                sum(item["commission_amount"] for item in items_list)
-            )
-        return sum(tot_result)/len(tot_result)
-
-    @property
     def commissions_promotions2(self):
         """ Commission amount per promotion for the day """
         result = defaultdict(int)
@@ -267,5 +252,5 @@ class Report(models.Model):
         return {
             "promotion": self.commissions_promotions2,
             "total": self.commissions_amount2,
-            "order_average": self.avg_commissions2,
+            "order_average": self.commissions_amount2/len(self.orders.all()),
         }
