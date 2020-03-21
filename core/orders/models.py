@@ -15,7 +15,6 @@ from django.utils.translation import ugettext_lazy as _
 
 from core.invoices.models import Commission
 from core.products.models import Product
-from core.promotions.models import Promotion, ProductPromotion
 
 
 def apply_rate(amount: float, rate: float, positive=True):
@@ -48,7 +47,8 @@ class Order(models.Model):
     @property
     def commission(self):
         """ Commission related to vendor """
-        return self.vendor.commissions.filter(created_at=self.created_at).first()
+        return self.vendor.commissions.filter(
+            created_at=self.created_at).first()
 
     @property
     def items_price(self) -> Dict:

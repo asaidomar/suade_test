@@ -29,8 +29,6 @@ class Report(models.Model):
             "orders__items__product__promotions"
         )
 
-
-
     @property
     def items(self):
         """ Items for day self.create_at """
@@ -122,19 +120,6 @@ class Report(models.Model):
     def items_count2(self):
         """ Return id or self.orders """
         return sum(i["quantity"] for i in self.items2.values("quantity"))
-
-    @property
-    def avg_order_total2(self):
-        """ The average order total for the day create_at """
-        result = defaultdict(list)
-
-        for item in self.items2:
-            result[item.order_id].append(item.get_price())
-
-        tot_result = list()
-        for k, items_list in result.items():
-            tot_result.append(sum(item["total_amount"] for item in items_list))
-        return sum(tot_result)/len(tot_result)
 
     @cached_property
     def commissions_vendor(self) -> Tuple[Dict, int]:

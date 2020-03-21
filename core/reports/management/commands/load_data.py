@@ -5,7 +5,7 @@
 # date : 2020-03-19
 # project: suade_test
 # author : alisaidomar
-# flake : noqa
+# noqa
 import csv
 import pathlib
 from datetime import datetime
@@ -42,7 +42,7 @@ def create_vendors_orders_cutomers():
                             tel=faker.phone_number()
                         )
                         print(f"Member {customer} generated.")
-                except:
+                except:  # noqa
                     pass
                 try:
                     vendor = vendor_models.Vendor.objects.filter(
@@ -54,7 +54,7 @@ def create_vendors_orders_cutomers():
                             vat_rate=20,
                             name=faker.company())
                         print(f"Vendor {vendor} generated.")
-                except:
+                except:  # noqa
                     pass
                 order, created = order_models.Order.objects.get_or_create(
                     id=row["id"],
@@ -62,7 +62,7 @@ def create_vendors_orders_cutomers():
                     vendor=vendor,
                     customer=customer)
                 print(f"Order {order} generated.")
-    except Exception as error:
+    except Exception:
         pass
 
 
@@ -129,13 +129,13 @@ def create_orders_items():
                 product.price = row["product_price"]
                 product.vat_rate = float(row["product_vat_rate"])
                 product.save()
-            except:
+            except:  # noqa
                 continue
             try:
                 order = order_models.Order.objects.get(id=row["order_id"])
                 product.vendor = order.vendor
                 product.save()
-            except:
+            except:  # noqa
                 continue
 
             try:
@@ -146,8 +146,9 @@ def create_orders_items():
                     discount=discount
                 )
                 print(f"Order Intem {item} generated.")
-            except:
+            except:  # noqa
                 pass
+
 
 def create_products_promotions():
     print("Generate products promotions")
@@ -161,13 +162,14 @@ def create_products_promotions():
             promotion = promotion_models.Promotion.objects.get(
                 id=row["promotion_id"])
             try:
-                pp, created = promotion_models.ProductPromotion.objects.get_or_create(
+                pp, created = \
+                    promotion_models.ProductPromotion.objects.get_or_create(  # noqa
                     start_at=row["date"],
                     promotion=promotion,
                     product=product,
                 )
                 print(f"Product Promotion {pp} generated.")
-            except:
+            except:  # noqa
                 continue
 
 
@@ -199,7 +201,7 @@ def create_commission():
                 com, created = invoice_models.Commission.objects.get_or_create(
                     rate=rate, vendor=vendor, created_at=row["date"])
                 print(f"Commission {com} generated.")
-            except:
+            except:  # noqa
                 continue
 
 

@@ -20,10 +20,13 @@ from core.reports.utils import build_report
 
 
 @pytest.fixture
-def create_report(create_order, create_vendor, create_promotion):
-    mixer.blend(Commission, rate=10, vendor=create_vendor)
+def create_report(create_vendor, create_promotion):
     nb_orders = 10
-    orders = mixer.cycle(nb_orders).blend(Order, vendor=create_vendor)
+    now = datetime.now().strftime("%Y-%m-%d")
+    mixer.blend(Commission, rate=10, created_at=now, vendor=create_vendor)
+    orders = mixer.cycle(nb_orders).blend(
+        Order, created_at=datetime.now().strftime("%Y-%m-%d"),
+        vendor=create_vendor)
     for order in orders:
         product = mixer.blend(Product)
 
@@ -120,23 +123,10 @@ def test_report_avg_total(create_report):
 
 
 @pytest.mark.django_db
-def test_report_avg_total2(create_report):
-    expected_sum = sum(
-        [
-            o.items_price["total_amount"]["total_amount"]
-            for o in create_report.orders.all()
-        ]
-    )
-    expected = expected_sum / create_report.orders.count()
-    assert create_report.avg_order_total2 == expected
-
-
-@pytest.mark.django_db
 def test_commissions_amount(create_report):
     expected_sum = sum(
         [
-            o.items_price["total_amount"]["total_amount"] *
-            (o.vendor.commission.rate / 100)
+            o.items_price["total_amount"]["total_amount"] * o.commission.rate
             for o in create_report.orders.all()
         ]
     )
@@ -147,8 +137,5 @@ def test_commissions_amount(create_report):
 @pytest.mark.django_db
 def test_commission_per_promotion(create_report):
     commission_per_promotion = create_report.commissions_promotions
-    product_set = set()
-    for order in create_report.orders.all():
-        for item in order.items.all():
-            product_set.add(item.product.promotion.promotion.id)
-    assert set(commission_per_promotion.keys()) == product_set
+    for k in commission_per_promotion.keys():
+        assert Promotion.objects.get(id=k)
